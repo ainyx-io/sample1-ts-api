@@ -95,25 +95,31 @@ routes.delete("/todos/:id", async (req: Request, res: Response) => {
 });
 
 // Update task route
-// routes.put("/todos/:id", async (req: Request, res: Response): Promise<void> => {
-//     const todoID = parseInt(req.params.id, 10);
-//     const { task } = req.body;
+routes.put("/todos/:id", async (req: Request, res: Response): Promise<void> => {
+    const todoID = parseInt(req.params.id, 10);
+    const { task } = req.body;
 
-//     // Validate task
-//     if (typeof task !== "string" || task.trim() === "") {
-//         res.status(400).json({ error: "Invalid task data" });
-//     }
+    // Validate task
+    if (typeof task !== "string" || task.trim() === "") {
+        res.status(400).json({ error: "Invalid task data" });
+    }
 
-//     try {
-//         await pool.query("UPDATE todos SET task = $1 WHERE id = $2", [
-//             task,
-//             todoID,
-//         ]);
-//         res.sendStatus(200);
-//     } catch (error) {
-//         console.error("Error updating todo", error);
-//         res.status(500).json({ error: "Error updating todo" });
-//     }
-// });
+    try {
+        const result = await pool.query("UPDATE todos SET task = $1 WHERE id = $2", [
+            task,
+            todoID,
+        ]);
+
+            // Check if any rows were affected
+            if (result.rowCount === 0) {
+                res.status(404).json({ error: "Todo not found" });
+            }
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.error("Error updating todo", error);
+        res.status(500).json({ error: "Error updating todo" });
+    }
+});
 
 export default routes;
