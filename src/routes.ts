@@ -8,13 +8,13 @@ routes.get("/", (req: Request, res: Response) => {
     res.send("Welcome to the To-Do List App!");
 });
 
-//applicants---post code
+
+// Applicants - POST endpoint
 routes.post("/applicants", async (req: Request, res: Response) => {
     const { applicants } = req.body; // Expect an array of applicants
 
-    // Validate that 'applicants' is an array and contains at least one applicant
     if (!Array.isArray(applicants) || applicants.length === 0) {
-         res.status(400).json({ error: "Invalid applicant data" });
+        res.status(400).json({ error: "Invalid applicant data" });
     }
 
     try {
@@ -23,32 +23,35 @@ routes.post("/applicants", async (req: Request, res: Response) => {
             if (typeof applicant.name === "string" && applicant.name.trim() !== "" &&
                 typeof applicant.designation === "string" && applicant.designation.trim() !== "" &&
                 typeof applicant.imgUrl === "string" && applicant.imgUrl.trim() !== "") {
-                    
+
                 const result = await pool.query(
                     "INSERT INTO applicants (name, designation, imgUrl) VALUES ($1, $2, $3) RETURNING *",
                     [applicant.name, applicant.designation, applicant.imgUrl]
                 );
                 createdApplicants.push(result.rows[0]);
+            } else {
+                console.warn("Skipped invalid applicant data:", applicant);
             }
         }
+
         res.status(201).json(createdApplicants);
     } catch (error) {
-        console.error("Error adding applicants", error);
+        console.error("Error adding applicants:", error);
         res.status(500).json({ error: "Error adding applicants" });
     }
 });
 
-//applicants-get code
+// Applicants - GET endpoint
 routes.get("/applicants", async (req: Request, res: Response) => {
     try {
         const result = await pool.query("SELECT * FROM applicants");
-        const applicants: any[] = result.rows;
-        res.json(applicants);
+        res.json(result.rows);
     } catch (error) {
-        console.error("Error fetching applicants", error);
+        console.error("Error fetching applicants:", error);
         res.status(500).json({ error: "Error fetching applicants" });
     }
 });
+
 
 
 //-----------------all basic codes---------------------------------
