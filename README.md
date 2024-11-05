@@ -1,1 +1,1 @@
-# sample1-ts-api
+# Sample1 TS API
